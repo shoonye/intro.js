@@ -57,19 +57,11 @@
       /* Scroll to highlighted element? */
       scrollToElement: true,
       /* Set the overlay opacity */
-      overlayOpacity: 0.8
+      overlayOpacity: 1
     };
   }
 
-  /**
-   * Initiate a new introduction/guide from an element in the page
-   *
-   * @api private
-   * @method _introForElement
-   * @param {Object} targetElm
-   * @returns {Boolean} Success or not?
-   */
-  function _introForElement(targetElm) {
+  function _createSteps(targetElm) {
     var introItems = [],
         self = this;
 
@@ -107,7 +99,8 @@
         }
       }
 
-    } else {
+    }
+    else {
        //use steps from data-* annotations
       var allIntroSteps = targetElm.querySelectorAll('*[data-intro]');
       //if there's no element to intro
@@ -173,6 +166,21 @@
 
     //set it to the introJs object
     self._introItems = introItems;
+  }
+
+  /**
+   * Initiate a new introduction/guide from an element in the page
+   *
+   * @api private
+   * @method _introForElement
+   * @param {Object} targetElm
+   * @returns {Boolean} Success or not?
+   */
+  function _introForElement(targetElm) {
+    _createSteps.call(this, targetElm);
+
+    var introItems = this._introItems,
+        self = this;
 
     //add overlay layer to the page
     if(_addOverlayLayer.call(self, targetElm)) {
@@ -498,8 +506,8 @@
       //set new position to helper layer
       helperLayer.setAttribute('style', 'width: ' + (elementPosition.width  + widthHeightPadding)  + 'px; ' +
                                         'height:' + (elementPosition.height + widthHeightPadding)  + 'px; ' +
-                                        'top:'    + (elementPosition.top    - 5)   + 'px;' +
-                                        'left: '  + (elementPosition.left   - 5)   + 'px;');
+                                        'top:'    + (elementPosition.top    - 8)   + 'px;' +
+                                        'left: '  + (elementPosition.left   - 8)   + 'px;');
     }
   }
 
@@ -525,9 +533,9 @@
           oldtooltipLayer      = oldHelperLayer.querySelector('.introjs-tooltiptext'),
           oldArrowLayer        = oldHelperLayer.querySelector('.introjs-arrow'),
           oldtooltipContainer  = oldHelperLayer.querySelector('.introjs-tooltip'),
-          skipTooltipButton    = oldHelperLayer.querySelector('.introjs-skipbutton'),
-          prevTooltipButton    = oldHelperLayer.querySelector('.introjs-prevbutton'),
-          nextTooltipButton    = oldHelperLayer.querySelector('.introjs-nextbutton');
+          skipTooltipButton    = oldHelperLayer.querySelector('.cancel_button'),
+          prevTooltipButton    = oldHelperLayer.querySelector('.grey_button'),
+          nextTooltipButton    = oldHelperLayer.querySelector('.button');
 
       //hide the tooltip
       oldtooltipContainer.style.opacity = 0;
@@ -652,6 +660,10 @@
         if (self._introItems.length - 1 != self._currentStep) {
           _nextStep.call(self);
         }
+        else {
+          self._introCompleteCallback.call(self, self._targetElement);
+          _exitIntro.call(self, self._targetElement);
+        }
       };
 
       nextTooltipButton.href = 'javascript:void(0);';
@@ -671,16 +683,20 @@
 
       //skip button
       var skipTooltipButton = document.createElement('a');
-      skipTooltipButton.className = 'introjs-button introjs-skipbutton';
+      skipTooltipButton.className = 'introjs-pn-button cancel_button';
       skipTooltipButton.href = 'javascript:void(0);';
       skipTooltipButton.innerHTML = this._options.skipLabel;
 
       skipTooltipButton.onclick = function() {
-        if (self._introItems.length - 1 == self._currentStep && typeof (self._introCompleteCallback) === 'function') {
-          self._introCompleteCallback.call(self);
+        if (this.getAttribute('isDone') === 'true') {
+          self._introCompleteCallback.call(self, self._targetElement);
         }
 
-        if (self._introItems.length - 1 != self._currentStep && typeof (self._introExitCallback) === 'function') {
+        //if (self._introItems.length - 1 == self._currentStep && typeof (self._introCompleteCallback) === 'function') {
+        //  self._introCompleteCallback.call(self, self._targetElement);
+        //}
+
+        else if (self._introItems.length - 1 != self._currentStep && typeof (self._introExitCallback) === 'function') {
           self._introExitCallback.call(self);
         }
 
@@ -701,18 +717,55 @@
       _placeTooltip.call(self, targetElement.element, tooltipLayer, arrowLayer, helperNumberLayer);
     }
 
+    prevTooltipButton.innerHTML = this._options.prevLabel;
+    nextTooltipButton.innerHTML = this._options.nextLabel;
     if (this._currentStep == 0 && this._introItems.length > 1) {
-      prevTooltipButton.className = 'introjs-button introjs-prevbutton introjs-disabled';
-      nextTooltipButton.className = 'introjs-button introjs-nextbutton';
+      prevTooltipButton.className = 'introjs-pn-button grey_button introjs-disabled';
+      nextTooltipButton.className = 'introjs-pn-button button';
       skipTooltipButton.innerHTML = this._options.skipLabel;
     } else if (this._introItems.length - 1 == this._currentStep || this._introItems.length == 1) {
       skipTooltipButton.innerHTML = this._options.doneLabel;
-      prevTooltipButton.className = 'introjs-button introjs-prevbutton';
-      nextTooltipButton.className = 'introjs-button introjs-nextbutton introjs-disabled';
+      skipTooltipButton.setAttribute('isDone', 'true');
+      prevTooltipButton.className = 'introjs-pn-button grey_button';
+      nextTooltipButton.className = 'introjs-pn-button button introjs-disabled';
     } else {
-      prevTooltipButton.className = 'introjs-button introjs-prevbutton';
-      nextTooltipButton.className = 'introjs-button introjs-nextbutton';
+      prevTooltipButton.className = 'introjs-pn-button grey_button';
+      nextTooltipButton.className = 'introjs-pn-button button';
       skipTooltipButton.innerHTML = this._options.skipLabel;
+    }
+
+    if (this._options.buttons) {
+      var buttonType
+      if (buttonType = this._options.buttons.prev) {
+        if (buttonType.enabled === false) {
+          prevTooltipButton.className = 'introjs-pn-button grey_button introjs-disabled';
+        }
+        else {
+          prevTooltipButton.className = 'introjs-pn-button grey_button';
+        }
+
+        if (buttonType.label) {
+          prevTooltipButton.innerHTML = buttonType.label;
+        }
+      }
+      if (buttonType = this._options.buttons.next) {
+        if (buttonType.enabled === false) {
+          nextTooltipButton.className = 'introjs-pn-button button introjs-disabled';
+        }
+        else {
+          nextTooltipButton.className = 'introjs-pn-button button';
+        }
+
+        if (buttonType.label) {
+          nextTooltipButton.innerHTML = buttonType.label;
+        }
+      }
+      if (buttonType = this._options.buttons.skip) {
+        skipTooltipButton.removeAttribute('isDone');
+        if (buttonType.label) {
+          skipTooltipButton.innerHTML = buttonType.label;
+        }
+      }
     }
 
     //Set focus on "next" button, so that hitting Enter always moves you onto the next step
@@ -984,6 +1037,7 @@
       _exitIntro.call(this, this._targetElement);
     },
     refresh: function() {
+      _createSteps.call(this, this._targetElement);
       _setHelperLayerPosition.call(this, document.querySelector('.introjs-helperLayer'));
       return this;
     },

@@ -374,6 +374,9 @@
       document.detachEvent('onkeydown', this._onKeyDown);
     }
 
+    // for use in event handlers
+    this._lastStep = this._currentStep;
+
     //set the step to zero
     this._currentStep = undefined;
   }
@@ -420,6 +423,21 @@
     }
 
     tooltipLayer.className = ('introjs-tooltip ' + tooltipCssClass).replace(/^\s+|\s+$/g, '');
+
+    // Set the width of the bullet elements explicitly to position them
+    $('.introjs-bullets').css({width: 'auto'});
+
+    var
+      buttonsWidth = 250, // $('.introjs-tooltipbuttons').width(),
+      availWidth = $('.introjs-tooltip').width() - buttonsWidth;
+
+    if ($('.introjs-bullets').width() < availWidth) {
+      $('.introjs-bullets').width(availWidth);
+    }
+    else {
+      $('.introjs-bullets').width('100%');
+    }
+
 
     //custom css class for tooltip boxes
     var tooltipCssClass = this._options.tooltipClass;
@@ -625,7 +643,7 @@
         if (i === 0) anchorLink.className = "active";
 
         anchorLink.href = 'javascript:void(0);';
-        anchorLink.innerHTML = "&nbsp;";
+        anchorLink.innerHTML = this._introItems[i].step;
         anchorLink.setAttribute('data-stepnumber', this._introItems[i].step);
 
         innerLi.appendChild(anchorLink);
@@ -804,11 +822,15 @@
 
       //Scroll up
       if (top < 0 || targetElement.element.clientHeight > winHeight) {
-        window.scrollBy(0, top - 30); // 30px padding from edge to look nice
+        //$(document).scrollTop(0, top - 30); // 30px padding from edge to look nice
+        //$('body').get(0).scrollTop = (top - 30);
+        $('body, html').scrollTop(top - 30);
 
       //Scroll down
       } else {
-        window.scrollBy(0, bottom + 100); // 70px + 30px padding from edge to look nice
+        //$(document).scrollTop(0, bottom + 100); // 70px + 30px padding from edge to look nice
+        //$('body').get(0).scrollTop = (bottom + 100);
+        $('body, html').scrollTop(bottom + 100);
       }
     }
 

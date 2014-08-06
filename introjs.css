@@ -151,10 +151,12 @@ tr.introjs-showElement > th {
   text-align: right;
   display: inline-block;
   float: right;
+  margin-bottom: 8px;
 }
 
 .introjs-tooltiptext {
   margin-bottom: 10px;
+  font-size: 0.9em;
 }
 
 .introjs-tooltiptext img {
@@ -249,12 +251,11 @@ tr.introjs-showElement > th {
 .introjs-bullets {
   text-align: center;
   display: inline-block;
-  margin-left: 30%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .introjs-bullets ul {
   clear: both;
-  margin: 10px auto 0;
+  margin: 3px auto 0;
   padding: 0;
   display: inline-block;
 }
@@ -265,19 +266,20 @@ tr.introjs-showElement > th {
 }
 .introjs-bullets ul li a {
   display: block;
-  width: 6px;
-  height: 6px;
-  background: #ccc;
+  width: 18px;
+  height: 18px;
   border-radius: 10px;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   text-decoration: none;
+  font-size: 0.8em;
 }
 .introjs-bullets ul li a:hover {
   background: #999;
 }
 .introjs-bullets ul li a.active {
-  background: #999;
+  background: #f15a29;
+  color: #fff;
 }
 .introjsFloatingElement {
   position: absolute;

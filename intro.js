@@ -784,6 +784,10 @@
           skipTooltipButton.innerHTML = buttonType.label;
         }
       }
+
+      if (this._options.buttons.once) {
+        this._options.buttons = null;
+      }
     }
 
     //Set focus on "next" button, so that hitting Enter always moves you onto the next step
